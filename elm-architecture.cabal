@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 893f3b029d171471c5d595593086edc70557013d928a4c0f6525f90258b7f0fa
+-- hash: b76db2c8ec772157a3c1cf20f0beb281695f208227e660e3df1a1fddbf25ea8b
 
 name:           elm-architecture
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/test#readme>
-homepage:       https://github.com/githubuser/test#readme
-bug-reports:    https://github.com/githubuser/test/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2020 Author name here
+homepage:       https://github.com/ohri-anurag/elm-architecture#readme
+bug-reports:    https://github.com/ohri-anurag/elm-architecture/issues
+author:         Anurag Ohri
+maintainer:     anuragohri92@gmail.com
+copyright:      2020 Anurag Ohri
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/test
+  location: https://github.com/ohri-anurag/elm-architecture
 
 library
   exposed-modules:

@@ -6,14 +6,18 @@ import Control.Lens
 import Data.Colour.SRGB
 import qualified Data.Text as T
 
-data Window a = Window WindowProps [Element a]
+data App a = App
+    { appProps :: AppProps
+    , elems :: [Element a]
+    }
+
 type Color = Colour Double
 
-data WindowProps = WindowProps
-    { _windowWidth :: Int
-    , _windowHeight :: Int
+data AppProps = AppProps
+    { _appWidth :: Int
+    , _appHeight :: Int
     , _name :: T.Text
-    , _windowBackgroundColor :: Color
+    , _appBackgroundColor :: Color
     }
 
 data Handler a
@@ -27,8 +31,8 @@ data Element a = Element
 
 data ViewElement
     = RectangleElement Rectangle
+    | TextBoxElement TextBox
     | InputBox
-    | TextBox
 
 data Rectangle = Rectangle
     { _topLeft :: Point
@@ -38,12 +42,33 @@ data Rectangle = Rectangle
     , _borderColor :: Color
     }
 
+data TextBox = TextBox
+    { _text :: T.Text
+    , _textTopLeft :: Point
+    , _textColor :: Color
+    , _textBackgroundColor :: Color
+    , _font :: Font
+    }
+
+data Font = Font
+    { _family :: String
+    , _size :: Int
+    }
+
 data Point = Point
     { _x :: Int
     , _y :: Int
     }
 
-makeLenses ''WindowProps
+data Requirements msg model = Requirements
+    { initModel :: model
+    , updateFn :: msg -> model -> model
+    , viewFn :: model -> App msg
+    }
+
+makeLenses ''AppProps
 makeLenses ''Element
 makeLenses ''Rectangle
+makeLenses ''TextBox
+makeLenses ''Font
 makeLenses ''Point

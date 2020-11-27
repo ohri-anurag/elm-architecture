@@ -25,6 +25,7 @@ dependencies:
 - lens
 - safe
 - sdl2
+- sdl2-ttf
 - StateVar
 - text
 

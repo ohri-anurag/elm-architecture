@@ -64,6 +64,8 @@ elmArchitecture requirements = do
     -- Initialise SDL objects
     (window, renderer) <- initialise $ appProps app
 
+    currentInputBoxMVar <- newMVar Nothing
+
     SDL.present renderer
 
     renderApp app renderer
@@ -71,7 +73,7 @@ elmArchitecture requirements = do
     handleEvents
         window
         (refreshApp requirements renderer modelMVar appMVar)
-        (getMessageForEventPayload app)
+        (getMessageForEventPayload app currentInputBoxMVar)
 
 handleEvents :: (Eq msg)
     => SDL.Window

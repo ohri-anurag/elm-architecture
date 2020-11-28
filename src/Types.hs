@@ -23,7 +23,7 @@ data AppProps = AppProps
 
 data Handler a
     = OnClick a
-    | OnInput a
+    | OnInput (T.Text -> a)
 
 data Element a = Element
     { _viewElement :: ViewElement
@@ -57,7 +57,7 @@ defaultStyles = Styles
 data ViewElement
     = RectangleElement
     | TextBoxElement T.Text
-    | InputBox
+    | InputBox T.Text
 
 data Point = Point
     { _x :: Int

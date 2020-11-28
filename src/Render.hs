@@ -37,7 +37,7 @@ render :: SDL.Renderer -> Element msg -> IO ()
 render renderer (Element viewElem _ styleCollection) = case viewElem of
     RectangleElement -> renderRectangle renderer styleCollection
     TextBoxElement str -> renderTextBox renderer str styleCollection
-    InputBox -> pure ()
+    InputBox str -> renderInputBox renderer str styleCollection
 
 renderRectangle :: SDL.Renderer -> Styles -> IO ()
 renderRectangle renderer styleCollection = do
@@ -53,7 +53,7 @@ renderRectangle renderer styleCollection = do
                                     (height styleCollection)))
 
 renderTextBox :: SDL.Renderer -> T.Text -> Styles -> IO ()
-renderTextBox renderer str styleCollection = do
+renderTextBox renderer str styleCollection = unless (T.null str) $ do
     let fs = fontSize styleCollection
 
     loadedFont <- Font.load (fontFamily styleCollection) fs
@@ -76,6 +76,11 @@ renderTextBox renderer str styleCollection = do
 
     SDL.destroyTexture textTexture
     SDL.freeSurface textSurface
+
+renderInputBox :: SDL.Renderer -> T.Text -> Styles -> IO ()
+renderInputBox renderer str styleCollection = do
+    renderRectangle renderer styleCollection
+    renderTextBox renderer str styleCollection
 
 exitWindow :: SDL.Window -> IO ()
 exitWindow window = do

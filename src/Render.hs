@@ -54,7 +54,10 @@ renderRectangle renderer styleCollection = do
 
 renderTextBox :: SDL.Renderer -> T.Text -> Styles -> IO ()
 renderTextBox renderer str styleCollection = unless (T.null str) $ do
-    let fs = fontSize styleCollection
+    let
+        fs = fontSize styleCollection
+        cw = width styleCollection
+        ch = height styleCollection
 
     loadedFont <- Font.load (fontFamily styleCollection) fs
 
@@ -72,7 +75,18 @@ renderTextBox renderer str styleCollection = unless (T.null str) $ do
         (CInt sh) = Raw.surfaceH rawSurface
     textTexture <- SDL.createTextureFromSurface renderer textSurface
 
-    SDL.copy renderer textTexture Nothing (Just $ toSDLRectangle (position styleCollection) (fromIntegral sw) (fromIntegral sh))
+    let
+        croppingRectangle =
+            if cw /= 0 && ch /= 0
+                then Just $ toSDLRectangle (Point 0 0) (fromIntegral cw) (fromIntegral ch)
+                else Nothing
+        w = min sw $ fromIntegral cw
+        h = min sh $ fromIntegral ch
+    SDL.copy
+        renderer
+        textTexture
+        croppingRectangle
+        (Just $ toSDLRectangle (position styleCollection) (fromIntegral w) (fromIntegral h))
 
     SDL.destroyTexture textTexture
     SDL.freeSurface textSurface

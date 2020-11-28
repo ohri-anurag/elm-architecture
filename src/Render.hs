@@ -1,14 +1,13 @@
 module Render where
 
 import Control.Lens hiding (element)
-import Control.Exception
 import Control.Monad
 import Data.StateVar
+import qualified Data.Text as T
 
 import Foreign.C.Types
 import Foreign.Storable
 
-import qualified SDL.Exception as SDL
 import qualified SDL.Init as SDL
 import qualified SDL.Video.Renderer as SDL
 import qualified SDL.Video as SDL
@@ -29,44 +28,41 @@ renderApp app renderer = do
     SDL.clear renderer
 
     -- Render all the elements in the app
-    mapM_ (render renderer . view viewElement) $ elems app
+    mapM_ (render renderer) $ elems app
 
     -- Display everything to the screen
     SDL.present renderer
 
-render :: SDL.Renderer -> ViewElement -> IO ()
-render renderer element = case element of
-    RectangleElement rect -> renderRectangle renderer rect
-    TextBoxElement textBox -> renderTextBox renderer textBox
+render :: SDL.Renderer -> Element msg -> IO ()
+render renderer (Element viewElem _ styleCollection) = case viewElem of
+    RectangleElement -> renderRectangle renderer styleCollection
+    TextBoxElement str -> renderTextBox renderer str styleCollection
     InputBox -> pure ()
 
-renderRectangle :: SDL.Renderer -> Rectangle -> IO ()
-renderRectangle renderer rectangleProps = do
-    void $ SDL.rendererDrawColor renderer $= fromColor (rectangleProps ^. borderColor)
+renderRectangle :: SDL.Renderer -> Styles -> IO ()
+renderRectangle renderer styleCollection = do
+    void $ SDL.rendererDrawColor renderer $= fromColor (borderColor styleCollection)
     SDL.drawRect renderer (Just (toSDLRectangle
-                                    (rectangleProps ^. topLeft)
-                                    (rectangleProps ^. rectangleWidth)
-                                    (rectangleProps ^. rectangleHeight)))
-    void $ SDL.rendererDrawColor renderer $= fromColor (rectangleProps ^. rectangleBackgroundColor)
+                                    (position styleCollection)
+                                    (width styleCollection)
+                                    (height styleCollection)))
+    void $ SDL.rendererDrawColor renderer $= fromColor (backgroundColor styleCollection)
     SDL.fillRect renderer (Just (toSDLRectangle
-                                    (rectangleProps ^. topLeft)
-                                    (rectangleProps ^. rectangleWidth)
-                                    (rectangleProps ^. rectangleHeight)))
+                                    (position styleCollection)
+                                    (width styleCollection)
+                                    (height styleCollection)))
 
-renderTextBox :: SDL.Renderer -> TextBox -> IO ()
-renderTextBox renderer textBox = do
-    let fontSize = textBox ^. font . size
+renderTextBox :: SDL.Renderer -> T.Text -> Styles -> IO ()
+renderTextBox renderer str styleCollection = do
+    let fs = fontSize styleCollection
 
-    loadedFont <- handle
-        -- Default font, in case the user specified font didn't load
-        (const $ Font.load "font/FreeSans.ttf" fontSize :: (SDL.SDLException -> IO Font.Font))
-        (Font.load (textBox ^. font . family) fontSize)
+    loadedFont <- Font.load (fontFamily styleCollection) fs
 
     textSurface <- Font.shaded
         loadedFont
-        (fromColor $ textBox ^. textColor)
-        (fromColor $ textBox ^. textBackgroundColor)
-        (textBox ^. text)
+        (fromColor $ fontColor styleCollection)
+        (fromColor $ backgroundColor styleCollection)
+        str
 
     let
         SDL.Surface rawSurfacePtr _ = textSurface
@@ -76,7 +72,7 @@ renderTextBox renderer textBox = do
         (CInt sh) = Raw.surfaceH rawSurface
     textTexture <- SDL.createTextureFromSurface renderer textSurface
 
-    SDL.copy renderer textTexture Nothing (Just $ toSDLRectangle (textBox ^. textTopLeft) (fromIntegral sw) (fromIntegral sh))
+    SDL.copy renderer textTexture Nothing (Just $ toSDLRectangle (position styleCollection) (fromIntegral sw) (fromIntegral sh))
 
     SDL.destroyTexture textTexture
     SDL.freeSurface textSurface

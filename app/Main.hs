@@ -21,10 +21,30 @@ view :: Model -> App Msg
 view model =
     App
         (AppProps 1920 1080 "Anurag" (sRGB24 100 149 237))
-        [ Element (RectangleElement $ Rectangle (Point 100 100) 600 200 c1 (sRGB 0 0 0)) [OnClick Rect1]
-        , Element (TextBoxElement $ TextBox t1 (Point 200 200) c2 c1 (Font "" 32)) []
-        , Element (RectangleElement $ Rectangle (Point 800 100) 600 200 c2 (sRGB 0 0 0)) [OnClick Rect2]
-        , Element (TextBoxElement $ TextBox t2 (Point 900 200) c1 c2 (Font "" 32)) []
+        [ Element RectangleElement [OnClick Rect1] $ defaultStyles
+            { position = Point 100 100
+            , width = 600
+            , height = 200
+            , backgroundColor = c1
+            }
+        , Element (TextBoxElement t1) [] $ defaultStyles
+            { position = Point 200 200
+            , fontColor = c2
+            , backgroundColor = c1
+            , fontSize = 32
+            }
+        , Element RectangleElement [OnClick Rect2] $ defaultStyles
+            { position = Point 800 100
+            , width = 600
+            , height = 200
+            , backgroundColor = c2
+            }
+        , Element (TextBoxElement t2) [] $ defaultStyles
+            { position = Point 900 200
+            , fontColor = c1
+            , backgroundColor = c2
+            , fontSize = 32
+            }
         ]
     where
         c1 = if model == Model1 then sRGB24 0 0 0 else sRGB24 237 149 100

@@ -34,15 +34,17 @@ toSDLRectangle p w h =
         (SDL.V2 (CInt $ fromIntegral w) (CInt $ fromIntegral h))
 
 containsPoint :: SDL.Point SDL.V2 Int32 -> Element msg -> Bool
-containsPoint (SDL.P (SDL.V2 x1 y1)) (Element element _) =
+containsPoint (SDL.P (SDL.V2 x1 y1)) (Element element _ styleCollection) =
     case element of
-        RectangleElement rectangle ->
+        RectangleElement ->
             let
-                x2 = fromIntegral $ rectangle ^. topLeft . x
-                y2 = fromIntegral $ rectangle ^. topLeft . y
+                point = position styleCollection
+                w = fromIntegral $ width styleCollection
+                h = fromIntegral $ height styleCollection
+                x2 = fromIntegral $ point ^. x
+                y2 = fromIntegral $ point ^. y
             in
-            x1 > x2 && x1 < (x2 + fromIntegral (rectangle ^. rectangleWidth)) &&
-            y1 > y2 && y1 < (y2 + fromIntegral (rectangle ^. rectangleHeight))
+            x1 > x2 && x1 < (x2 + w) && y1 > y2 && y1 < (y2 + h)
         TextBoxElement _ -> False
         InputBox -> False
 

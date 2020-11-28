@@ -3,6 +3,7 @@
 module Types where
 
 import Control.Lens
+import Data.Colour.Names
 import Data.Colour.SRGB
 import qualified Data.Text as T
 
@@ -27,33 +28,36 @@ data Handler a
 data Element a = Element
     { _viewElement :: ViewElement
     , _handlers :: [Handler a]
+    , _styles :: Styles
+    }
+
+data Styles = Styles
+    { fontFamily :: String
+    , fontColor :: Color
+    , backgroundColor :: Color
+    , borderColor :: Color
+    , fontSize :: Int
+    , position :: Point
+    , width :: Int
+    , height :: Int
+    }
+
+defaultStyles :: Styles
+defaultStyles = Styles
+    { fontFamily = "font/FreeSans.ttf"
+    , fontColor = black
+    , backgroundColor = black
+    , borderColor = black
+    , fontSize = 24
+    , position = Point 0 0
+    , width = 0
+    , height = 0
     }
 
 data ViewElement
-    = RectangleElement Rectangle
-    | TextBoxElement TextBox
+    = RectangleElement
+    | TextBoxElement T.Text
     | InputBox
-
-data Rectangle = Rectangle
-    { _topLeft :: Point
-    , _rectangleWidth :: Int
-    , _rectangleHeight :: Int
-    , _rectangleBackgroundColor :: Color
-    , _borderColor :: Color
-    }
-
-data TextBox = TextBox
-    { _text :: T.Text
-    , _textTopLeft :: Point
-    , _textColor :: Color
-    , _textBackgroundColor :: Color
-    , _font :: Font
-    }
-
-data Font = Font
-    { _family :: String
-    , _size :: Int
-    }
 
 data Point = Point
     { _x :: Int
@@ -68,7 +72,4 @@ data Requirements msg model = Requirements
 
 makeLenses ''AppProps
 makeLenses ''Element
-makeLenses ''Rectangle
-makeLenses ''TextBox
-makeLenses ''Font
 makeLenses ''Point

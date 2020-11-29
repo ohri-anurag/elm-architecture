@@ -1,12 +1,13 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Helpers where
+module ElmArchitecture.Helpers where
 
 import Control.Concurrent.MVar
 import Control.Lens hiding (element)
 import Control.Monad
 import Data.Colour.SRGB
 import Data.Int
+import Data.List
 import Data.Maybe
 import qualified Data.Text as T
 import Data.Word
@@ -19,7 +20,7 @@ import qualified SDL.Input as SDL
 import qualified SDL.Vect as SDL
 import qualified SDL.Video as SDL
 
-import Types
+import ElmArchitecture.Types
 
 intToCInt :: Int -> CInt
 intToCInt = CInt . fromIntegral
@@ -38,18 +39,15 @@ toSDLRectangle p w h =
         (SDL.V2 (CInt $ fromIntegral w) (CInt $ fromIntegral h))
 
 containsPoint :: SDL.Point SDL.V2 Int32 -> Element msg -> Bool
-containsPoint (SDL.P (SDL.V2 x1 y1)) (Element element _ styleCollection) =
-    case element of
-        TextBoxElement _ -> False
-        _ ->
-            let
-                point = position styleCollection
-                w = fromIntegral $ width styleCollection
-                h = fromIntegral $ height styleCollection
-                x2 = fromIntegral $ point ^. x
-                y2 = fromIntegral $ point ^. y
-            in
-            x1 > x2 && x1 < (x2 + w) && y1 > y2 && y1 < (y2 + h)
+containsPoint (SDL.P (SDL.V2 x1 y1)) (Element _ _ styleCollection) =
+    let
+        point = position styleCollection
+        w = fromIntegral $ width styleCollection
+        h = fromIntegral $ height styleCollection
+        x2 = fromIntegral $ point ^. x
+        y2 = fromIntegral $ point ^. y
+    in
+    x1 > x2 && x1 < (x2 + w) && y1 > y2 && y1 < (y2 + h)
 
 getMessageForEventPayload :: App msg -> MVar (Maybe (T.Text, T.Text -> msg)) -> (msg -> IO ()) -> SDL.EventPayload -> IO ()
 getMessageForEventPayload app currentInputBoxMVar processMessage eventPayload = do
@@ -117,5 +115,5 @@ getMessageForEventPayload app currentInputBoxMVar processMessage eventPayload = 
 
 getClickedElement :: App msg -> SDL.Point SDL.V2 Int32 -> Maybe (Element msg)
 getClickedElement app click = do
-    let clickedElements = filter (containsPoint click) $ elems app
+    let clickedElements = sortOn (zIndex . view styles) $ filter (containsPoint click) $ elems app
     headMay clickedElements

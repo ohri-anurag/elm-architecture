@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib where
+module ElmArchitecture (
+    elmArchitecture
+) where
 
 import Control.Concurrent.MVar
 import Control.Monad
@@ -16,9 +18,9 @@ import qualified SDL.Video as SDL
 
 import qualified SDL.Font as Font
 
-import Types
-import Helpers
-import Render
+import ElmArchitecture.Types
+import ElmArchitecture.Helpers
+import ElmArchitecture.Render
 
 initialise :: AppProps -> IO (SDL.Window, SDL.Renderer)
 initialise props = do

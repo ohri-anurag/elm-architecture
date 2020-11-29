@@ -1,9 +1,12 @@
-module Render where
+module ElmArchitecture.Render where
+
+import Paths_elm_architecture
 
 import Control.Lens hiding (element)
 import Control.Monad
 import Data.StateVar
 import qualified Data.Text as T
+import System.FilePath
 
 import Foreign.C.Types
 import Foreign.Storable
@@ -16,8 +19,8 @@ import qualified SDL.Raw.Types as Raw
 
 import qualified SDL.Font as Font
 
-import Types
-import Helpers
+import ElmArchitecture.Types
+import ElmArchitecture.Helpers
 
 -- This function takes an app that is the output of our viewFn
 -- and renders it to the screen
@@ -53,43 +56,56 @@ renderRectangle renderer styleCollection = do
                                     (height styleCollection)))
 
 renderTextBox :: SDL.Renderer -> T.Text -> Styles -> IO ()
-renderTextBox renderer str styleCollection = unless (T.null str) $ do
-    let
-        fs = fontSize styleCollection
-        cw = width styleCollection
-        ch = height styleCollection
+renderTextBox renderer str styleCollection = do
+    unless (T.null str) $ do
+        let
+            fs = fontSize styleCollection
+            cw = width styleCollection
+            ch = height styleCollection
 
-    loadedFont <- Font.load (fontFamily styleCollection) fs
+        loadedFont <- case fontFamily styleCollection of
+            DefaultFont -> do
+                defaultDir <- getDataDir
+                Font.load (defaultDir </> "font/FreeSans.ttf") fs
+            UserFont path -> Font.load path fs
 
-    textSurface <- Font.shaded
-        loadedFont
-        (fromColor $ fontColor styleCollection)
-        (fromColor $ backgroundColor styleCollection)
-        str
+        textSurface <- Font.shaded
+            loadedFont
+            (fromColor $ fontColor styleCollection)
+            (fromColor $ backgroundColor styleCollection)
+            str
 
-    let
-        SDL.Surface rawSurfacePtr _ = textSurface
-    rawSurface <- peek rawSurfacePtr
-    let
-        (CInt sw) = Raw.surfaceW rawSurface
-        (CInt sh) = Raw.surfaceH rawSurface
-    textTexture <- SDL.createTextureFromSurface renderer textSurface
+        let
+            SDL.Surface rawSurfacePtr _ = textSurface
+        rawSurface <- peek rawSurfacePtr
+        let
+            (CInt sw) = Raw.surfaceW rawSurface
+            (CInt sh) = Raw.surfaceH rawSurface
+        textTexture <- SDL.createTextureFromSurface renderer textSurface
 
-    let
-        croppingRectangle =
-            if cw /= 0 && ch /= 0
-                then Just $ toSDLRectangle (Point 0 0) (fromIntegral cw) (fromIntegral ch)
-                else Nothing
-        w = min sw $ fromIntegral cw
-        h = min sh $ fromIntegral ch
-    SDL.copy
-        renderer
-        textTexture
-        croppingRectangle
-        (Just $ toSDLRectangle (position styleCollection) (fromIntegral w) (fromIntegral h))
+        let
+            croppingRectangle =
+                if cw /= 0 && ch /= 0
+                    then Just $ toSDLRectangle (Point 0 0) (fromIntegral cw) (fromIntegral ch)
+                    else Nothing
+            w = if cw == 0 then sw else min sw $ fromIntegral cw
+            h = if ch == 0 then sh else min sh $ fromIntegral ch
 
-    SDL.destroyTexture textTexture
-    SDL.freeSurface textSurface
+        renderRectangle renderer $ styleCollection
+            { width = if cw == 0 then fromIntegral sw else cw
+            , height = if ch == 0 then fromIntegral sh else ch
+            }
+        SDL.copy
+            renderer
+            textTexture
+            croppingRectangle
+            (Just $ toSDLRectangle (position styleCollection) (fromIntegral w) (fromIntegral h))
+
+        SDL.destroyTexture textTexture
+        SDL.freeSurface textSurface
+
+    when (T.null str) $
+        renderRectangle renderer styleCollection
 
 renderInputBox :: SDL.Renderer -> T.Text -> Styles -> IO ()
 renderInputBox renderer str styleCollection = do

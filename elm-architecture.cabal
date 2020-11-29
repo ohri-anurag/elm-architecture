@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1191b100b291947738d32d9fb608885bc7988e0caea60e718885accac0987114
+-- hash: 00a8d1e32e811bab57aa6696995fed876782859bc503184ae71191da95c7dba6
 
 name:           elm-architecture
 version:        0.1.0.0
@@ -20,6 +20,8 @@ build-type:     Simple
 extra-source-files:
     README.md
     ChangeLog.md
+data-files:
+    font/FreeSans.ttf
 
 source-repository head
   type: git
@@ -27,10 +29,10 @@ source-repository head
 
 library
   exposed-modules:
-      Helpers
-      Lib
-      Render
-      Types
+      ElmArchitecture
+      ElmArchitecture.Helpers
+      ElmArchitecture.Render
+      ElmArchitecture.Types
   other-modules:
       Paths_elm_architecture
   hs-source-dirs:
@@ -39,6 +41,7 @@ library
       StateVar
     , base >=4.7 && <5
     , colour
+    , filepath
     , lens
     , safe
     , sdl2
@@ -58,6 +61,7 @@ executable elm-architecture
     , base >=4.7 && <5
     , colour
     , elm-architecture
+    , filepath
     , lens
     , safe
     , sdl2
@@ -78,6 +82,7 @@ test-suite elm-architecture-test
     , base >=4.7 && <5
     , colour
     , elm-architecture
+    , filepath
     , lens
     , safe
     , sdl2

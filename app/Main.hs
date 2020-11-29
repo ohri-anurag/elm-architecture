@@ -5,8 +5,8 @@ module Main where
 import Data.Colour.SRGB
 import qualified Data.Text as T
 
-import Lib
-import Types
+import ElmArchitecture
+import ElmArchitecture.Types
 
 newtype Msg = Input T.Text
     deriving (Eq, Show)

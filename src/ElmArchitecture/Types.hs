@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Types where
+module ElmArchitecture.Types where
 
 import Control.Lens
 import Data.Colour.Names
@@ -32,7 +32,7 @@ data Element a = Element
     }
 
 data Styles = Styles
-    { fontFamily :: String
+    { fontFamily :: FontPath
     , fontColor :: Color
     , backgroundColor :: Color
     , borderColor :: Color
@@ -40,11 +40,16 @@ data Styles = Styles
     , position :: Point
     , width :: Int
     , height :: Int
+    , zIndex :: Int
     }
+
+data FontPath
+    = DefaultFont
+    | UserFont FilePath
 
 defaultStyles :: Styles
 defaultStyles = Styles
-    { fontFamily = "font/FreeSans.ttf"
+    { fontFamily = DefaultFont
     , fontColor = black
     , backgroundColor = black
     , borderColor = black
@@ -52,6 +57,7 @@ defaultStyles = Styles
     , position = Point 0 0
     , width = 0
     , height = 0
+    , zIndex = 0
     }
 
 data ViewElement

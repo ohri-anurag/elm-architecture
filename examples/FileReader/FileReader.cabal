@@ -1,0 +1,71 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 56de9142dd5d9249a8db29f86432412cd02a092ed12e24c622004d8dbb4a1484
+
+name:           FileReader
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/FileReader#readme>
+homepage:       https://github.com/githubuser/FileReader#readme
+bug-reports:    https://github.com/githubuser/FileReader/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/FileReader
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_FileReader
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , colour
+    , elm-architecture
+    , text
+  default-language: Haskell2010
+
+executable FileReader-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_FileReader
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      FileReader
+    , base >=4.7 && <5
+    , colour
+    , elm-architecture
+    , text
+  default-language: Haskell2010
+
+test-suite FileReader-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_FileReader
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      FileReader
+    , base >=4.7 && <5
+    , colour
+    , elm-architecture
+    , text
+  default-language: Haskell2010

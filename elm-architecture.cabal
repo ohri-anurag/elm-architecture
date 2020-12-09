@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 00a8d1e32e811bab57aa6696995fed876782859bc503184ae71191da95c7dba6
+-- hash: 34d72a71cdf0908e725d5ee62c3d0c3fc238b8735a9be5392d717a58000cd60b
 
 name:           elm-architecture
 version:        0.1.0.0
@@ -30,6 +30,7 @@ source-repository head
 library
   exposed-modules:
       ElmArchitecture
+      ElmArchitecture.API
       ElmArchitecture.Helpers
       ElmArchitecture.Render
       ElmArchitecture.Types

@@ -6,7 +6,6 @@ import Data.Colour.SRGB
 import qualified Data.Text as T
 
 import ElmArchitecture
-import ElmArchitecture.Types
 
 data Msg
     = Input T.Text
@@ -21,10 +20,9 @@ type Action = ()
 
 view :: Model -> App Msg
 view (Model text) =
-    App
-        (AppProps 1920 1080 "Anurag" (sRGB24 0 0 0))
-        [ Element (InputBox text) [OnInput Input] $ defaultStyles
-            { position = Point 900 200
+    app 1920 1080 "Anurag" black
+        [ inputBox text [onInput Input] $ defaultStyles
+            { position = point 900 200
             , fontColor = c2
             , backgroundColor = c1
             , fontSize = 32
@@ -41,9 +39,4 @@ update (Input text) _ = (Model text, Nothing)
 update NoOp model = (model, Nothing)
 
 main :: IO ()
-main = elmArchitecture $ Requirements
-    { initModel = Model ""
-    , viewFn = view
-    , updateFn = update
-    , actionFn = const $ pure NoOp
-    }
+main = elmArchitecture (Model "") view update (const $ pure NoOp)

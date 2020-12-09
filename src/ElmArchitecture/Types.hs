@@ -3,7 +3,6 @@
 module ElmArchitecture.Types where
 
 import Control.Lens
-import Data.Colour.Names
 import Data.Colour.SRGB
 import qualified Data.Text as T
 
@@ -46,19 +45,6 @@ data Styles = Styles
 data FontPath
     = DefaultFont
     | UserFont FilePath
-
-defaultStyles :: Styles
-defaultStyles = Styles
-    { fontFamily = DefaultFont
-    , fontColor = black
-    , backgroundColor = black
-    , borderColor = black
-    , fontSize = 24
-    , position = Point 0 0
-    , width = 0
-    , height = 0
-    , zIndex = 0
-    }
 
 data ViewElement
     = RectangleElement

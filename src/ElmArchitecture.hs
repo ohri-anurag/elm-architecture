@@ -1,12 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module ElmArchitecture (
-    elmArchitecture
+    elmArchitecture,
+
+    module ElmArchitecture.API,
+
+    App,
+    Styles(..),
+
+    module Data.Colour.Names
 ) where
 
 import Control.Concurrent.MVar
 import Control.Monad
-import Control.Lens hiding (element)
+import Control.Lens hiding (element, view)
 
 import Foreign.C.Types
 
@@ -20,6 +27,9 @@ import qualified SDL.Font as Font
 import ElmArchitecture.Types
 import ElmArchitecture.Helpers
 import ElmArchitecture.Render
+import ElmArchitecture.API
+
+import Data.Colour.Names
 
 initialise :: AppProps -> IO (SDL.Window, SDL.Renderer)
 initialise props = do
@@ -61,28 +71,33 @@ refreshApp requirements renderer modelMVar appMVar msg = do
 
         Nothing -> pure ()
 
-elmArchitecture :: (Eq msg, Eq model) => Requirements msg model action -> IO ()
-elmArchitecture requirements = do
+elmArchitecture :: (Eq msg, Eq model)
+    => model                                    -- Initial Model
+    -> (model -> App msg)                       -- The view function
+    -> (msg -> model -> (model, Maybe action))  -- The update function
+    -> (action -> IO msg)                       -- The action handler, for side-effects
+    -> IO ()
+elmArchitecture model view update action = do
     let
-        model = initModel requirements
-        app = viewFn requirements model
+        appView = view model
+        requirements = Requirements model update view action
 
     modelMVar <- newMVar model
-    appMVar <- newMVar app
+    appMVar <- newMVar appView
 
     -- Initialise SDL objects
-    (window, renderer) <- initialise $ appProps app
+    (window, renderer) <- initialise $ appProps appView
 
     currentInputBoxMVar <- newMVar Nothing
 
     SDL.present renderer
 
-    renderApp app renderer
+    renderApp appView renderer
 
     handleEvents
         window
         (refreshApp requirements renderer modelMVar appMVar)
-        (getMessageForEventPayload app currentInputBoxMVar)
+        (getMessageForEventPayload appView currentInputBoxMVar)
 
 handleEvents :: (Eq msg)
     => SDL.Window

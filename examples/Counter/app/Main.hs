@@ -7,7 +7,6 @@ import Lib
 import Data.Colour.SRGB
 import qualified Data.Text as T
 import ElmArchitecture
-import ElmArchitecture.Types
 
 type Model = Int
 
@@ -28,28 +27,27 @@ update msg model =
 
 view :: Model -> App Msg
 view model =
-    App
-        (AppProps 1920 1080 "Counter" (sRGB24 0 0 0))
-        [ Element (TextBoxElement "+") [OnClick Inc] $ defaultStyles
-            { position = Point 800 500
-            , fontColor = (sRGB24 0 0 0)
-            , backgroundColor = (sRGB24 255 255 255)
+    app 1920 1080 "Counter" grey
+        [ textBox "+" [onClick Inc] $ defaultStyles
+            { position = point 800 500
+            , fontColor = white
+            , backgroundColor = green
             , fontSize = 32
             , width = 25
             , height = 40
             }
-        , Element (TextBoxElement (T.pack $ show model)) [] $ defaultStyles
-            { position = Point 900 500
-            , fontColor = (sRGB24 0 0 0)
-            , backgroundColor = (sRGB24 255 255 255)
+        , textBox (T.pack $ show model) [] $ defaultStyles
+            { position = point 900 500
+            , fontColor = white
+            , backgroundColor = if model == 0 then black else if model > 0 then green else red
             , fontSize = 32
-            , width = 25
+            , width = 30
             , height = 40
             }
-        , Element (TextBoxElement "-") [OnClick Dec] $ defaultStyles
-            { position = Point 1000 500
-            , fontColor = (sRGB24 0 0 0)
-            , backgroundColor = (sRGB24 255 255 255)
+        , textBox "-" [onClick Dec] $ defaultStyles
+            { position = point 1000 500
+            , fontColor = white
+            , backgroundColor = red
             , fontSize = 32
             , width = 25
             , height = 40
@@ -57,9 +55,4 @@ view model =
         ]
 
 main :: IO ()
-main = elmArchitecture $ Requirements
-    { initModel = 0
-    , viewFn = view
-    , updateFn = update
-    , actionFn = const $ pure NoOp
-    }
+main = elmArchitecture 0 view update (const $ pure NoOp)

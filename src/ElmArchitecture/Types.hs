@@ -70,10 +70,11 @@ data Point = Point
     , _y :: Int
     }
 
-data Requirements msg model = Requirements
+data Requirements msg model action = Requirements
     { initModel :: model
-    , updateFn :: msg -> model -> model
+    , updateFn :: msg -> model -> (model, Maybe action)
     , viewFn :: model -> App msg
+    , actionFn :: action -> IO msg
     }
 
 makeLenses ''AppProps

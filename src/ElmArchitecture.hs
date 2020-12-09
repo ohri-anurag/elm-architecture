@@ -7,7 +7,6 @@ module ElmArchitecture (
 import Control.Concurrent.MVar
 import Control.Monad
 import Control.Lens hiding (element)
--- import Control.Monad
 
 import Foreign.C.Types
 
@@ -42,11 +41,11 @@ initialise props = do
 
     pure (window, renderer)
 
-refreshApp :: Requirements msg model -> SDL.Renderer -> MVar model -> MVar (App msg) -> msg -> IO ()
+refreshApp :: Requirements msg model action -> SDL.Renderer -> MVar model -> MVar (App msg) -> msg -> IO ()
 refreshApp requirements renderer modelMVar appMVar msg = do
     currentModel <- readMVar modelMVar
     let
-        newModel = updateFn requirements msg currentModel
+        (newModel, maybeAction) = updateFn requirements msg currentModel
         newApp = viewFn requirements newModel
 
     void $ swapMVar modelMVar newModel
@@ -54,7 +53,15 @@ refreshApp requirements renderer modelMVar appMVar msg = do
 
     renderApp newApp renderer
 
-elmArchitecture :: (Eq msg, Eq model) => Requirements msg model -> IO ()
+    case maybeAction of
+        Just action -> do
+            newMsg <- actionFn requirements action
+
+            refreshApp requirements renderer modelMVar appMVar newMsg
+
+        Nothing -> pure ()
+
+elmArchitecture :: (Eq msg, Eq model) => Requirements msg model action -> IO ()
 elmArchitecture requirements = do
     let
         model = initModel requirements

@@ -11,14 +11,20 @@ import ElmArchitecture.Types
 
 type Model = Int
 
-data Msg = Inc | Dec
+data Msg
+    = Inc
+    | Dec
+    | NoOp
     deriving Eq
 
-update :: Msg -> Model -> Model
+type Action = ()
+
+update :: Msg -> Model -> (Model, Maybe Action)
 update msg model =
     case msg of
-        Inc -> model + 1
-        Dec -> model - 1
+        Inc -> (model + 1, Nothing)
+        Dec -> (model - 1, Nothing)
+        NoOp -> (model, Nothing)
 
 view :: Model -> App Msg
 view model =
@@ -55,4 +61,5 @@ main = elmArchitecture $ Requirements
     { initModel = 0
     , viewFn = view
     , updateFn = update
+    , actionFn = const $ pure NoOp
     }

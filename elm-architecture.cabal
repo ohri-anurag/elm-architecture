@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 34d72a71cdf0908e725d5ee62c3d0c3fc238b8735a9be5392d717a58000cd60b
+-- hash: 371d03b5d3c44cac2a62d6d4bb3eb5e40072e44f4384c9a0ce5cb2ccb3058670
 
 name:           elm-architecture
 version:        0.1.0.0
@@ -48,6 +48,7 @@ library
     , sdl2
     , sdl2-ttf
     , text
+    , transformers
   default-language: Haskell2010
 
 executable elm-architecture
@@ -68,6 +69,7 @@ executable elm-architecture
     , sdl2
     , sdl2-ttf
     , text
+    , transformers
   default-language: Haskell2010
 
 test-suite elm-architecture-test
@@ -89,4 +91,5 @@ test-suite elm-architecture-test
     , sdl2
     , sdl2-ttf
     , text
+    , transformers
   default-language: Haskell2010

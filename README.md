@@ -21,25 +21,26 @@ The app is built on 4 pillars. They define everything that the does, and display
 The function that is responsible for creating and displaying your entire app is this one:
 
 ```haskell
-elmArchitecture :: (Eq msg, Eq model) => Requirements msg model action -> IO ()
-```
-
-### Requirements
-
-```haskell
-data Requirements msg model action = Requirements
-    { initModel :: model
-    , updateFn :: msg -> model -> (model, Maybe action)
-    , viewFn :: model -> App msg
-    , actionFn :: action -> IO msg
-    }
+elmArchitecture :: (Eq msg, Eq model)
+    => model                                    -- Initial Model
+    -> (model -> App msg)                       -- The view function
+    -> (msg -> model -> (model, Maybe action))  -- The update function
+    -> (action -> IO msg)                       -- The action handler, for side-effects
+    -> IO ()
 ```
 
 As you can see, most of the types above are user-defined, the only exception being `App`.
+
+Users familiar with `Elm` will also notice the similarity between the generic `action` type used here and Cmd type used in `Elm`. My main rationale for not following the Elm way here is the difference between a browser app and an actual app.
+
+Browser applications are restricted in many ways, for example, writing to a file on the user's system. Haskell applications, on the other hand, are not restricted, Haskell being a full fledged programming language. Actions can be thought of as analogous to subscriptions.
 
 ## TODO
 
 - [ ] Add documentation for view types, including `App`.
 - [ ] Add documentation for examples, inside `examples` directory.
 - [ ] Add more rendering capabilities (scrolling etc).
+- [ ] Make action handling async.
+- [ ] Add a font cache.
+- [ ] Make all data types strict.
 - [ ] Add as a library to Hackage/Stackage.

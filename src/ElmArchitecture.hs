@@ -13,6 +13,8 @@ module ElmArchitecture (
 
 import Control.Concurrent.MVar
 import Control.Monad
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Reader (ask, runReaderT)
 import Control.Lens hiding (element, view)
 
 import Foreign.C.Types
@@ -31,8 +33,8 @@ import ElmArchitecture.API
 
 import Data.Colour.Names
 
-initialise :: AppProps -> IO (SDL.Window, SDL.Renderer)
-initialise props = do
+initialiseSDL :: AppProps -> IO (SDL.Window, SDL.Renderer)
+initialiseSDL props = do
     -- Initialise SDL in video mode
     SDL.initialize [SDL.InitVideo]
 
@@ -51,23 +53,35 @@ initialise props = do
 
     pure (window, renderer)
 
-refreshApp :: Requirements msg model action -> SDL.Renderer -> MVar model -> MVar (App msg) -> msg -> IO ()
-refreshApp requirements renderer modelMVar appMVar msg = do
-    currentModel <- readMVar modelMVar
+initialiseState :: model -> App msg -> IO (AppState model msg)
+initialiseState model appView = AppState
+    <$> newMVar model
+    <*> newMVar appView
+    <*> newMVar Nothing
+
+refreshApp
+    :: Requirements msg model action
+    -> SDL.Renderer
+    -> msg
+    -> MyReader model msg ()
+refreshApp requirements renderer msg = do
+    appState <- ask
+    currentModel <- lift $ readMVar $ currentState appState
     let
         (newModel, maybeAction) = updateFn requirements msg currentModel
         newApp = viewFn requirements newModel
 
-    void $ swapMVar modelMVar newModel
-    void $ swapMVar appMVar newApp
+    void $ lift $ swapMVar (currentState appState) newModel
+    void $ lift $ swapMVar (currentView appState) newApp
 
-    renderApp newApp renderer
+    lift $ renderApp newApp renderer
 
     case maybeAction of
         Just action -> do
-            newMsg <- actionFn requirements action
+            -- This needs to be made async
+            newMsg <- lift $ actionFn requirements action
 
-            refreshApp requirements renderer modelMVar appMVar newMsg
+            refreshApp requirements renderer newMsg
 
         Nothing -> pure ()
 
@@ -82,41 +96,35 @@ elmArchitecture model view update action = do
         appView = view model
         requirements = Requirements model update view action
 
-    modelMVar <- newMVar model
-    appMVar <- newMVar appView
+    appState <- initialiseState model appView
 
     -- Initialise SDL objects
-    (window, renderer) <- initialise $ appProps appView
-
-    currentInputBoxMVar <- newMVar Nothing
+    (window, renderer) <- initialiseSDL $ appProps appView
 
     SDL.present renderer
 
     renderApp appView renderer
 
-    handleEvents
-        window
-        (refreshApp requirements renderer modelMVar appMVar)
-        (getMessageForEventPayload appView currentInputBoxMVar)
+    let processMessage = refreshApp requirements renderer
+    runReaderT (
+            handleEvents
+            window
+            (`getMessageForEventPayload` processMessage)
+        ) appState
 
-handleEvents :: (Eq msg)
-    => SDL.Window
-    -> (msg -> IO ())
-    -> (
-        (msg -> IO ())
-        -> SDL.EventPayload
-        -> IO ()
-        )
-    -> IO ()
-handleEvents window processMessage processEvent = do
+handleEvents
+    :: SDL.Window
+    -> (SDL.EventPayload -> MyReader model msg ())
+    -> MyReader model msg ()
+handleEvents window processEvent = do
     event <- SDL.pollEvent
     case event of
         Just (SDL.Event _ eventPayload) -> do
             case eventPayload of
                 SDL.QuitEvent ->
-                    exitWindow window
+                    lift $ exitWindow window
                 _ -> do
-                    processEvent processMessage eventPayload
-                    handleEvents window processMessage processEvent
+                    processEvent eventPayload
+                    handleEvents window processEvent
         Nothing ->
-            handleEvents window processMessage processEvent
+            handleEvents window processEvent

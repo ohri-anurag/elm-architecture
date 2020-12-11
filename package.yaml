@@ -29,6 +29,7 @@ dependencies:
 - sdl2-ttf
 - StateVar
 - text
+- transformers
 
 data-files: font/FreeSans.ttf
 

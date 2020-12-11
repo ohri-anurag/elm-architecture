@@ -4,7 +4,9 @@ module ElmArchitecture.Helpers where
 
 import Control.Concurrent.MVar
 import Control.Lens hiding (element)
-import Control.Monad
+import Control.Monad (void)
+import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.Reader (ask)
 import Data.Colour.SRGB
 import Data.Int
 import Data.List
@@ -49,19 +51,24 @@ containsPoint (SDL.P (SDL.V2 x1 y1)) (Element _ _ styleCollection) =
     in
     x1 > x2 && x1 < (x2 + w) && y1 > y2 && y1 < (y2 + h)
 
-getMessageForEventPayload :: App msg -> MVar (Maybe (T.Text, T.Text -> msg)) -> (msg -> IO ()) -> SDL.EventPayload -> IO ()
-getMessageForEventPayload app currentInputBoxMVar processMessage eventPayload = do
+getMessageForEventPayload
+    :: SDL.EventPayload
+    -> (msg -> MyReader model msg ())
+    -> MyReader model msg ()
+getMessageForEventPayload eventPayload processMessage = do
+    appState <- ask
     case eventPayload of
         SDL.MouseButtonEvent eventData ->
             if SDL.mouseButtonEventMotion eventData == SDL.Released
                 then do
-                    case getClickedElement app $ SDL.mouseButtonEventPos eventData of
+                    appView <- lift $ readMVar $ currentView appState
+                    case getClickedElement appView $ SDL.mouseButtonEventPos eventData of
                         Just element -> do
                             -- If user clicked on a input, select it
                             case element ^. viewElement of
                                 InputBox t ->
                                     case mapMaybe isOnInput $ view handlers element of
-                                        (f : _) -> void $ swapMVar currentInputBoxMVar $ Just (t, f)
+                                        (f : _) -> void $ lift $ swapMVar (currentInputBox appState) $ Just (t, f)
                                         _ -> pure ()
                                 _ -> pure ()
                             
@@ -76,12 +83,12 @@ getMessageForEventPayload app currentInputBoxMVar processMessage eventPayload = 
         SDL.TextInputEvent eventData -> do
             let inputText = SDL.textInputEventText eventData
 
-            currentInputBox <- readMVar currentInputBoxMVar
+            inputBox <- lift $ readMVar (currentInputBox appState)
 
-            case currentInputBox of
+            case inputBox of
                 Just (currentText, msg) -> do
                     let newText = T.append currentText inputText
-                    void $ swapMVar currentInputBoxMVar $ Just (newText, msg)
+                    void $ lift $ swapMVar (currentInputBox appState) $ Just (newText, msg)
                     processMessage $ msg newText
                 Nothing -> pure ()
 
@@ -90,12 +97,12 @@ getMessageForEventPayload app currentInputBoxMVar processMessage eventPayload = 
                 then do
                     case SDL.keysymKeycode $ SDL.keyboardEventKeysym eventData of
                         SDL.KeycodeBackspace -> do
-                            currentInputBox <- readMVar currentInputBoxMVar
+                            inputBox <- lift $ readMVar (currentInputBox appState)
 
-                            case currentInputBox of
+                            case inputBox of
                                 Just (currentText, msg) -> do
                                     let newText = if T.null currentText then T.empty else T.init currentText
-                                    void $ swapMVar currentInputBoxMVar $ Just (newText, msg)
+                                    void $ lift $ swapMVar (currentInputBox appState) $ Just (newText, msg)
                                     processMessage $ msg newText
                                 Nothing -> pure ()
 

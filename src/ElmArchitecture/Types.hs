@@ -2,7 +2,9 @@
 
 module ElmArchitecture.Types where
 
+import Control.Concurrent.MVar (MVar)
 import Control.Lens
+import Control.Monad.Trans.Reader
 import Data.Colour.SRGB
 import qualified Data.Text as T
 
@@ -62,6 +64,14 @@ data Requirements msg model action = Requirements
     , viewFn :: model -> App msg
     , actionFn :: action -> IO msg
     }
+
+data AppState model msg = AppState
+    { currentState :: MVar model
+    , currentView :: MVar (App msg)
+    , currentInputBox :: MVar (Maybe (T.Text, T.Text -> msg)) -- (Current Text, Input Handler)
+    }
+
+type MyReader model msg a = ReaderT (AppState model msg) IO a
 
 makeLenses ''AppProps
 makeLenses ''Element

@@ -37,6 +37,7 @@ Browser applications are restricted in many ways, for example, writing to a file
 
 ## TODO
 
+- [ ] Implement border width (make sure font doesn't override border, change the cropping rectangle)
 - [ ] Add documentation for view types, including `App`.
 - [ ] Add documentation for examples, inside `examples` directory.
 - [ ] Add more rendering capabilities (scrolling etc).

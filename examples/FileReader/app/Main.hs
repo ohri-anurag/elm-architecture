@@ -20,17 +20,19 @@ data Action = ReadFile
 view :: Model -> App Msg
 view str =
     app  1920 1080 "FileReader" (color 150 150 150)
-        [ textBox (T.pack str) [] $ defaultStyles
-            { position = point 800 0
+        [ textBox (T.pack str) alignment [] $ defaultStyles
+            { position = point 460 200
+            , width = 1000
             , fontSize = 32
             }
-        , textBox "Read" [onClick ReadClicked] $ defaultStyles
-            { position = point 800 700
+        , textBox "Read" alignment [onClick ReadClicked] $ defaultStyles
+            { position = point 910 700
             , fontSize = 32
-            , width = 80
-            , height = 40
+            , width = 100
+            , height = 50
             }
         ]
+        where alignment = Just (Alignment Center Middle)
 
 update :: Msg -> Model -> (Model, Maybe Action)
 update ReadClicked str = (str, Just ReadFile)

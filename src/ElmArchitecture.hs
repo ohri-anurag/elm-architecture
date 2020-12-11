@@ -7,6 +7,9 @@ module ElmArchitecture (
 
     App,
     Styles(..),
+    Alignment(..),
+    HorizontalAlignment(..),
+    VerticalAlignment(..),
 
     module Data.Colour.Names
 ) where

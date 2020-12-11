@@ -8,8 +8,8 @@ import Data.Colour.Names (black, white)
 import ElmArchitecture.Types
 
 -- VIEW ELEMENTS
-textBox :: T.Text -> [Handler a] -> Styles -> Element a
-textBox text = Element (TextBoxElement text)
+textBox :: T.Text -> Maybe Alignment -> [Handler a] -> Styles -> Element a
+textBox text alignment = Element (TextBoxElement text alignment)
 
 inputBox :: T.Text -> [Handler a] -> Styles -> Element a
 inputBox text = Element (InputBox text)
@@ -28,6 +28,10 @@ onInput = OnInput
 -- COLOR
 color :: Word8 -> Word8 -> Word8 -> Color
 color = sRGB24
+
+-- FONT
+font :: FilePath -> FontPath
+font = UserFont
 
 -- STYLES
 defaultStyles :: Styles

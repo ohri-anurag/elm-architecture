@@ -28,31 +28,32 @@ update msg model =
 view :: Model -> App Msg
 view model =
     app 1920 1080 "Counter" grey
-        [ textBox "+" [onClick Inc] $ defaultStyles
+        [ textBox "+" alignment [onClick Inc] $ defaultStyles
             { position = point 800 500
             , fontColor = white
             , backgroundColor = green
             , fontSize = 32
-            , width = 25
-            , height = 40
+            , width = 50
+            , height = 50
             }
-        , textBox (T.pack $ show model) [] $ defaultStyles
+        , textBox (T.pack $ show model) alignment [] $ defaultStyles
             { position = point 900 500
             , fontColor = white
             , backgroundColor = if model == 0 then black else if model > 0 then green else red
             , fontSize = 32
-            , width = 30
-            , height = 40
+            , width = 50
+            , height = 50
             }
-        , textBox "-" [onClick Dec] $ defaultStyles
+        , textBox "-" alignment [onClick Dec] $ defaultStyles
             { position = point 1000 500
             , fontColor = white
             , backgroundColor = red
             , fontSize = 32
-            , width = 25
-            , height = 40
+            , width = 50
+            , height = 50
             }
         ]
+    where alignment = Just (Alignment Center Middle)
 
 main :: IO ()
 main = elmArchitecture 0 view update (const $ pure NoOp)

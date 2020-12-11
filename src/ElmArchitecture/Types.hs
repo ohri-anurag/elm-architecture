@@ -48,9 +48,23 @@ data FontPath
     = DefaultFont
     | UserFont FilePath
 
+data HorizontalAlignment
+    = Left
+    | Center
+    | Right
+    deriving Eq
+
+data VerticalAlignment
+    = Top
+    | Middle
+    | Bottom
+    deriving Eq
+
+data Alignment = Alignment HorizontalAlignment VerticalAlignment
+
 data ViewElement
     = RectangleElement
-    | TextBoxElement T.Text
+    | TextBoxElement T.Text (Maybe Alignment)
     | InputBox T.Text
 
 data Point = Point
